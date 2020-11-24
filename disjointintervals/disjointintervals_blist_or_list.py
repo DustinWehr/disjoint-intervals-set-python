@@ -56,14 +56,14 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
     def intervals(self) -> List[Interval]:
         return self._inter
 
-    def _index_of_interval_touching_strictly_from_left(self, x: int) -> Optional[int]:
+    def _index_of_interval_touching_strictly_from_left(self, x: int, ibl_x=None) -> Optional[int]:
         """
         If there is a range that starts strictly before x, and either contains x or has x
         as its right open endpoint, then return the index of that range. Otherwise return None.
         """
         # With the default lexicographic ordering on tuples, the x - 1 ensures we'll get the index
         # of an existing range starting at x if there is one, rather the index after it.
-        ibl_x = bisect_left(self._inter, (x, x - 1))
+        ibl_x = ibl_x if ibl_x is not None else self._bisect_left(x)
         if ibl_x > 0:
             assert self._inter[ibl_x - 1][0] < x
             if self._inter[ibl_x - 1][1] >= x:  # its right, open endpoint touches x
@@ -187,9 +187,10 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
         # The remaining cases are divided into PART 1 and PART 2.
         # See comments below.
 
+        ibl_s = self._bisect_left(s)
         # We want j to be the index of a range starting at or before s, if there is one.
         # The next if/elif blocks accomplish that.
-        j = self._bisect_left(s)
+        j = ibl_s
         if j == len(self._inter):
             # no existing range starts with s, and moreover
             # there is a range that starts strictly before s
@@ -228,7 +229,7 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
         # PART 2
         # These are exactly the cases where [s,e) is NOT a subset of an existing range.
         # assert all(not subset((s,e),r) for r in self.intervals())
-        i = self._index_of_interval_touching_strictly_from_left(s)
+        i = self._index_of_interval_touching_strictly_from_left(s, ibl_s)
         if i is not None:
             s1, e1 = self._inter[i]
             assert s <= e1
