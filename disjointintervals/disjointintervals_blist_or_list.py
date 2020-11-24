@@ -122,7 +122,9 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
 
         # Case: Any ranges that lie within [s,e) have neither s nor e as endpoints.
         # We replace all of them with [s,e), keeping the ranges to the left and right of [s,e).
-        self._inter = self._inter[:ibl_s] + self._list_class([(s,e)]) + self._inter[ibl_e:]
+        # self._inter = self._inter[:ibl_s] + self._list_class([(s,e)]) + self._inter[ibl_e:]
+        self._inter[ibl_s:ibl_e] = self._list_class([(s, e)])
+
 
 
     def add(self, s: int, e: int) -> None:
