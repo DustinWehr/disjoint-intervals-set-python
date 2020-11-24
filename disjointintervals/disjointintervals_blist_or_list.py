@@ -1,11 +1,10 @@
 from typing import Optional, cast, Type
-from bisect import bisect_right, bisect_left
-# from blist import blist
-
+USE_CPYTHON_BISECT = False
+if USE_CPYTHON_BISECT:
+    from bisect import bisect_right, bisect_left
 from disjointintervals.interval import *
 from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from disjointintervals.types.disjointintervals import Interval
-
 
 class DisjointIntervalsFast(DisjointIntervalsInterface):
 
@@ -15,15 +14,44 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
         self._list_class = list_class
         self._inter = list_class(cast(List[Interval], intervals if intervals else []))  # type:ignore
         self._inter.sort(key=lambda x: x[0])
+        if USE_CPYTHON_BISECT:
+            self._bisect_left = lambda x: bisect_left(self._inter, (x, x))
+            self._bisect_right = lambda x: bisect_right(self._inter, (x, x))
 
     def __len__(self) -> int:
         return len(self._inter)
 
     def _bisect_left(self, x: int):
-        return bisect_left(self._inter, (x,x))
+        # This method gets overwritten if USE_CPYTHON_BISECT is True.
+        # Next line would use CPython's bisect_left, which makes tests pass and is something like 10 or 20% faster,
+        # but I have no idea why it appears to work with blist, and no confidence that it's actually correct to use it.
+        # So, I've copied the python code from python 3.8's bisect.py into here instead. But you can override the use of
+        # this by setting USE_CPYTHON_BISECT = True.
+        # return bisect_left(self._inter, (x,x))
+        a = self._inter
+        lo = 0
+        hi = len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if a[mid][0] < x:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo
 
     def _bisect_right(self, x: int):
-        return bisect_right(self._inter, (x,x))
+        # See note in _bisect_left
+        # return bisect_right(self._inter, (x,x))
+        a = self._inter
+        lo = 0
+        hi = len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if x < a[mid][0]:
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
 
     def intervals(self) -> List[Interval]:
         return self._inter
