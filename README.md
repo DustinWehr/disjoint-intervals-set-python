@@ -1,3 +1,16 @@
+# Todo
+
+- Mypy
+- Optimal `get_intersecting`
+- Remove sortedlist implementation?
+
+## Done
+
+- Look into CPython's `bisect` for `blist`; didn't look at the C code.
+See commit 21ba8e56 for approach taken.
+- Rename `DisjointIntervalsFast`, make it an ABC, and give list and blist implementations their own classes.
+
+
 # Note to any seekers of jobs at K*****
 
 This repo grew out of my solution to a coding challenge I did while interviewing for a job at K*****. If you are looking

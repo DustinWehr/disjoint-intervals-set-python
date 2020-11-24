@@ -1,4 +1,4 @@
-from blist import blist
+# from blist import blist
 import cProfile
 
 print("""Run this script with one of
@@ -12,8 +12,9 @@ from tests.helpers_for_tests import run_ops_timed
 
 if __name__ == '__main__':
     # for showing better perf by blist:
-    ops1 = random_adds_various_deletes(100000, .9, range(0, 100000000), 1000, 10000)
-    ops1a = random_adds_various_deletes(100000, .8, range(0, 100000000), 1000, 10000)
+    ops1c = random_adds_various_deletes(1000000, .7, range(0, 100000000), 100, 10000)
+    ops1b = random_adds_various_deletes(100000, .9, range(0, 1000000000), 100, 1000000)
+    ops1 = random_adds_various_deletes(100000, .8, range(0, 100000000), 1000, 10000)
 
     ops2 = random_adds_various_deletes(100000, .8, range(0, 1000000), 1000, 100000)
     ops3 = random_adds_various_deletes(100000, .8, range(0, 100000), 100, 10000)

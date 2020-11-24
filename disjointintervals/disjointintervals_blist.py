@@ -4,7 +4,7 @@ from blist import blist
 
 from disjointintervals.disjointintervals_listlike_abc import DisjointIntervalsListlikeABC, Interval
 
-USE_CPYTHON_BISECT_WITH_BLIST = True
+USE_CPYTHON_BISECT_WITH_BLIST = False
 
 
 class DisjointIntervalsBList(DisjointIntervalsListlikeABC):

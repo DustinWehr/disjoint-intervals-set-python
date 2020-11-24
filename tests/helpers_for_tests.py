@@ -22,6 +22,8 @@ IMPLEMENTATIONS = [DisjointIntervalsSlowSpec,
                    # DisjointIntervalsSortedList
                    ]
 
+SIZE_CHANGE_NOTIF_THRESH = 1000
+SIZE_INC_NOTIF_THRESH = 1000
 
 def allimpl(fn):
     def test_it():
@@ -64,8 +66,17 @@ def run_op(ranges: DisjointIntervalsInterface, op: RangeOp) -> None:
 def run_ops_timed(ranges: DisjointIntervalsInterface,
                   ops: List[RangeOp]) -> None:
     start = time.perf_counter()
+    cursize = 0
+    last_inc_notif = 0
     for op in ops:
         run_op(ranges, op)
+        newsize = len(ranges)
+        if abs(newsize - last_inc_notif) > SIZE_CHANGE_NOTIF_THRESH:
+            print(f"# intervals changed since last notification by {newsize - last_inc_notif} to {newsize}.")
+            last_inc_notif = newsize
+        # if abs(newsize - cursize) > SIZE_CHANGE_NOTIF_THRESH:
+        #     print(f"# intervals changed in one op by {newsize - cursize} to {newsize}.")
+        cursize = newsize
     print(f"{time.perf_counter() - start} seconds.")
 
 
