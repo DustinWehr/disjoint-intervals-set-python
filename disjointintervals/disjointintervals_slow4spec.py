@@ -1,11 +1,13 @@
+from typing import Iterable
+
 from disjointintervals.interval import *
 from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from disjointintervals.types.disjointintervals import Interval
 
 
 class DisjointIntervalsSlowSpec(DisjointIntervalsInterface):
-    def __init__(self, intervals: List[Interval] = None) -> None:
-        DisjointIntervalsInterface.__init__(self, intervals)
+    def __init__(self, intervals: Iterable[Interval] = None) -> None:
+        DisjointIntervalsInterface.__init__(self)
         self._intervals: List[Interval] = intervals or []
 
     def intervals(self) -> List[Interval]:
@@ -45,3 +47,6 @@ class DisjointIntervalsSlowSpec(DisjointIntervalsInterface):
             if intersection_nonempty(r1, r2):
                 rv.append(r2)
         return rv
+
+    def __len__(self) -> int:
+        return len(self._intervals)

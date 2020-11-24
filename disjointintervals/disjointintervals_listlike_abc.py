@@ -1,53 +1,65 @@
-from typing import Optional, cast, Iterable
-from blist import sortedlist
+from typing import Optional, cast, Type, Iterable
 
 from disjointintervals.interval import *
 from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from disjointintervals.types.disjointintervals import Interval
 
 
-class DisjointIntervalsSortedList(DisjointIntervalsInterface):
+class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
+    _ListOrBList = None
 
-    def __init__(self, intervals: Iterable[Interval] = None) -> None:
-        DisjointIntervalsInterface.__init__(self, intervals)
-        self._inter = sortedlist(intervals if intervals else [])  # type:ignore
+    def __init__(self, intervals: Iterable[Interval] = None):
+        DisjointIntervalsInterface.__init__(self)
+        self._inter = self._ListOrBList(cast(Iterable[Interval], intervals or []))  # type:ignore
+        self._inter.sort(key=lambda x: x[0])
 
     def __len__(self) -> int:
         return len(self._inter)
 
+    def _bisect_left(self, x: int):
+        # Overwritten in subclasses
+        a = self._inter
+        lo = 0
+        hi = len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if a[mid][0] < x:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo
+
+    def _bisect_right(self, x: int):
+        # Overwritten in subclasses
+        a = self._inter
+        lo = 0
+        hi = len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if x < a[mid][0]:
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
+
     def intervals(self) -> List[Interval]:
-        return list(self._inter)
+        return self._inter
 
-    def _bisect_left(self, x:int) -> int:
-        # With the default lexicographic ordering on tuples, (x, x) ensures we'll get the index
-        # of an existing range starting at x if there is one, rather the index after it.
-        return self._inter.bisect_left((x, x))
-
-    def _bisect_right(self, x:int) -> int:
-        return self._inter.bisect_right((x, x))
-
-    def _change_closed_endpoint(self, i, s, e):
-        self._replace(i, (s, e))
-
-    def _change_open_endpoint(self, i, s, e):
-        self._replace(i, (s, e))
-
-    def _replace(self, i:int, r:Interval) -> None:
-        del self._inter[i]
-        self._inter.add(r)
-        assert self._bisect_left(r[0]) == i, f"Expected {self._bisect_left(r[0])} == {i}. Looked up interval was {r}."
-
-    def _index_of_interval_touching_strictly_from_left(self, x: int) -> Optional[int]:
+    def _index_of_interval_touching_strictly_from_left(self, x: int, ibl_x=None) -> Optional[int]:
         """
         If there is a range that starts strictly before x, and either contains x or has x
         as its right open endpoint, then return the index of that range. Otherwise return None.
         """
-        ibl_x = self._bisect_left(x)
+        # With the default lexicographic ordering on tuples, the x - 1 ensures we'll get the index
+        # of an existing range starting at x if there is one, rather the index after it.
+        if ibl_x is None:
+            ibl_x = self._bisect_left(x)
         if ibl_x > 0:
             assert self._inter[ibl_x - 1][0] < x
             if self._inter[ibl_x - 1][1] >= x:  # its right, open endpoint touches x
                 return ibl_x - 1
         return None
+
 
     def _add_normalized(self, s: int, e: int, s_index: int, e_index: int) -> None:
         """
@@ -56,17 +68,16 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
         Pre:
         - No range has open endpoint s.
         - s is in the range set iff it's a left endpoint of some existing range.
-        - There is no existing range that starts in [s,e] and ends at or after e (i.e. whose
+        - There is no existing range that starts in [s,e] that ends at or after e (i.e. whose
           right endpoint is greater than e).
         """
-
         # "ibl_s" for index of bisect_left on s
-        # ibl_s = self._bisect_left(s)
         ibl_s = s_index
+        # ibl_s = self._bisect_left(s)
+
         if ibl_s == len(self._inter):
             # no intersection
-            # blist.sortedlist has no `append`
-            self._inter.add((s,e))
+            self._inter.append((s,e))
             return
 
         # ibl_s < len(self._inter)
@@ -76,10 +87,10 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
             if e == e2:
                 return  # [s,e) is already a range. Nothing to do.
             # e2 < e
-            # We right-extend [s,e2) to [s,e) and then delete any ranges within [s,e)
-            self._change_open_endpoint(ibl_s, s, e)
             # ibl_e = self._bisect_left(e)
             ibl_e = e_index
+            # We right-extend [s,e2) to [s,e) and then delete any ranges within [s,e)
+            self._inter[ibl_s] = (s,e)
             if ibl_s + 1 < ibl_e:
                 del self._inter[ibl_s + 1: ibl_e]
             return
@@ -94,14 +105,16 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
         if e3 == e:
             # Case: [s3,e) is a range, where s3 > s. This can only happen at index ibl_e - 1.
             # We left-extend [s2,e) to [s,e) and then delete any ranges strictly within [s,e).
-            self._change_closed_endpoint(ibl_e - 1, s, e)
+            self._inter[ibl_e - 1] = (s,e)
             del self._inter[ibl_s: ibl_e - 1]
             return
 
         # Case: Any ranges that lie within [s,e) have neither s nor e as endpoints.
         # We replace all of them with [s,e), keeping the ranges to the left and right of [s,e).
-        del self._inter[ibl_s:ibl_e]
-        self._inter.add((s, e))
+        # self._inter = self._inter[:ibl_s] + self._ListOrBList([(s,e)]) + self._inter[ibl_e:]
+        self._inter[ibl_s:ibl_e] = self._ListOrBList([(s, e)])
+
+
 
     def add(self, s: int, e: int) -> None:
         """
@@ -136,8 +149,8 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
                 # [e,e2) is an existing range, which means this call to add should effectively
                 # union [s,e) and [e,e2). So it's equivalent to call self.add(s,e2), so redefine e:
                 e = e2
+                # UNSURE!!!!!!!!!!!!
                 new_e_index = ibl_e + 1
-                assert self._bisect_left(e) == new_e_index
                 e_updated = True
 
         if not e_updated and ibl_e > 0:
@@ -147,10 +160,11 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
                 # to add should effectively union [s,e) and [s2,e2).
                 # So it's equivalent to call self.add(s,e2), so redefine e:
                 e = e2
+                # UNSURE
                 # new_e_index is still ibl_e
-                assert self._bisect_left(e) == new_e_index
 
         self._add_normalized(s, e, new_s_index, new_e_index)
+
 
     def delete(self, s: int, e: int) -> None:
         """
@@ -162,17 +176,13 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
         if len(self._inter) == 0:
             return  # no ranges in data structure
 
-        # this doesn't work. think about it.
-        # self.add(s, e)
-        # self._inter.remove((s, e))
-        # return
-
         # The remaining cases are divided into PART 1 and PART 2.
         # See comments below.
 
+        ibl_s = self._bisect_left(s)
         # We want j to be the index of a range starting at or before s, if there is one.
         # The next if/elif blocks accomplish that.
-        j = self._bisect_left(s)
+        j = ibl_s
         if j == len(self._inter):
             # no existing range starts with s, and moreover
             # there is a range that starts strictly before s
@@ -190,48 +200,60 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
             if s1 <= s and e <= e1:
                 # PART 1
                 # The cases where [s,e) is a subset of an existing range.
+
                 if s1 < s:
                     if e < e1:
                         # s1 < s < e < e1
                         # [s1,e1) strictly contains [s,e) on both sides, so [s1,e1) gets split in two,
                         # into [s1,s) and [e,e1)
-                        self._replace(j, (s1, s))
-                        self._inter.add((e, e1))  # actually, know that it could go at j + 1
+                        self._inter[j] = (s1, s)
+                        self._inter.insert(j + 1, (e, e1))
                     else:  # e == e1. one truncation suffices
-                        self._replace(j, (s1, s))
+                        self._inter[j] = (s1, s)
                 else:  # s1 == s
                     if e < e1:
-                        self._replace(j, (e, e1))
+                        self._inter[j] = (e, e1)
                     else:  # e == e1. [s,e) is an existing range
                         del self._inter[j]
+
                 return
+
+        # Note: if we get here, self._inter has not been modified, so ibl_s is still correct.
+        assert ibl_s == self._bisect_left(s)
 
         # PART 2
         # These are exactly the cases where [s,e) is NOT a subset of an existing range.
-        # assert all(not subset((s,e),r) for r in self.intervals())
-        i = self._index_of_interval_touching_strictly_from_left(s)
+        assert all(not subset((s, e), r) for r in self.intervals())
+        i = self._index_of_interval_touching_strictly_from_left(s, ibl_s)
         if i is not None:
             s1, e1 = self._inter[i]
             assert s <= e1
             # truncate [s1,e1)
-            self._replace(i, (s1, s))
+            self._inter[i] = (s1, s)
+            # ibl_s remains valid.
+            assert ibl_s == self._bisect_left(s)
 
-        i = self._index_of_interval_touching_strictly_from_left(e)
+        ibl_e = self._bisect_left(e)
+        i = self._index_of_interval_touching_strictly_from_left(e, ibl_e)
         if i is not None:
             s1, e1 = self._inter[i]
             assert s < s1  # otherwise we would have been in the PART 1 cases
             assert s1 < e
             if e < e1:
-                # truncate [s1,e1)
-                self._replace(i, (e, e1))
+                # truncate [s1,e1) to [e,e1)
+                self._inter[i] = (e, e1)
+                ibl_e -= 1  # insertion position of e changed.
             else:  # e == e1
                 # [s1,e1) needs to be deleted and not replaced with anything, which will happen
                 # shortly outside this conditional.
                 pass
 
+        assert ibl_s == self._bisect_left(s)
+        assert ibl_e == self._bisect_left(e)
+        # ibl_s = self._bisect_left(s)
+        # ibl_e = self._bisect_left(e)
+
         # just remains to delete all the ranges within [s,e).
-        ibl_s = self._bisect_left(s)
-        ibl_e = self._bisect_left(e)
         del self._inter[ibl_s: ibl_e]
 
     def get_intersecting(self, s: int, e: int) -> List[Interval]:
@@ -246,9 +268,18 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
         start = max(ibl_s - 1, 0)
         end = min(ibr_e + 1, len(self._inter))
 
-        # For blist, iterating through slice is more efficient than without slice. Assuming the same for sortedlist.
-        for r in self._inter[start:end]:
-            if intersection_nonempty(se, r):
-                rv.append(r)
+        if self._ListOrBList == list:
+            for i in range(start, end):
+                r = self._inter[i]
+                if intersection_nonempty(se, r):
+                    rv.append(r)
+        else:
+            # This version is more efficient for self._inter of type blist, but for self._inter of type list it might
+            # unnecessarily create a new array.
+            for r in self._inter[start:end]:
+                if intersection_nonempty(se, r):
+                    rv.append(r)
 
         return rv
+
+

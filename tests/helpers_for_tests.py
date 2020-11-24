@@ -8,8 +8,9 @@ from .context import disjointintervals
 from disjointintervals.types.disjointintervals import Interval
 from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from disjointintervals.disjointintervals_slow4spec import DisjointIntervalsSlowSpec
-from disjointintervals.disjointintervals_blist_or_list import DisjointIntervalsBList, DisjointIntervalsList
-from disjointintervals.disjointintervals_blist_sortedlist import DisjointIntervalsSortedList
+from disjointintervals.disjointintervals_list import DisjointIntervalsList
+from disjointintervals.disjointintervals_blist import DisjointIntervalsBList
+from disjointintervals.disjointintervals_blistsortedlist import DisjointIntervalsSortedList
 
 RangeOp = Tuple[str, Interval]
 

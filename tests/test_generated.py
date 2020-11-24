@@ -1,7 +1,7 @@
 from .context import disjointintervals
 from disjointintervals.disjointintervals_slow4spec import DisjointIntervalsSlowSpec
-from disjointintervals.disjointintervals_blist_or_list import DisjointIntervalsList, DisjointIntervalsBList
-from disjointintervals.disjointintervals_blist_sortedlist import DisjointIntervalsSortedList
+from disjointintervals.disjointintervals_listlike_abc import DisjointIntervalsList, DisjointIntervalsBList
+from disjointintervals.disjointintervals_blistsortedlist import DisjointIntervalsSortedList
 from .helpers_for_tests import run_ops
 
 def test_small_opseq(opseq):
