@@ -42,51 +42,6 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
                 return ibl_x - 1
         return None
 
-    def _add_normalized_old(self, s: int, e: int) -> None:
-        """
-        Does the same as add, but with stronger preconditions.
-        "range set" = the union of the ranges
-        Pre:
-        - s is in the range set iff it's a left endpoint of some existing range.
-        - There is no existing range that starts in [s,e] that ends at or after e (i.e. whose
-          right endpoint is greater than e).
-        """
-        # "ibl_s" for index of bisect_left on s
-        ibl_s = self._bisect_left(s)
-        ibl_e = self._bisect_left(e)
-
-        if ibl_s == len(self._inter):
-            # no intersection
-            self._inter.append((s,e))
-            return
-
-        # ibl_s < len(self._inter)
-        s2, e2 = self._inter[ibl_s]
-        if s == s2:
-            # Case: [s,e') is a range for some e'. This can only happen at ibl_s.
-            if e == e2:
-                return  # [s,e) is already a range. Nothing to do.
-            # e2 < e
-            # We right-extend [s,e2) to [s,e) and then delete any ranges within [s,e)
-            self._inter[ibl_s] = (s,e)
-            if ibl_s + 1 < ibl_e:
-                del self._inter[ibl_s + 1: ibl_e]
-            return
-
-        # Case: [s,e') is not a range for any e'.
-        # Remains to check if [s',e) is a range for some s' > s
-        # [s3,e3) is the range that ends just before or at e
-        s3, e3 = self._inter[ibl_e - 1]
-        if e3 == e:
-            # Case: [s3,e) is a range, where s3 > s. This can only happen at index ibl_e - 1.
-            # We left-extend [s2,e) to [s,e) and then delete any ranges strictly within [s,e).
-            self._inter[ibl_e - 1] = (s,e)
-            del self._inter[ibl_s: ibl_e - 1]
-            return
-
-        # Case: Any ranges that lie within [s,e) have neither s nor e as endpoints.
-        # We replace all of them with [s,e), keeping the ranges to the left and right of [s,e).
-        self._inter = self._inter[:ibl_s] + self._list_class([(s,e)]) + self._inter[ibl_e:]
 
     def _add_normalized(self, s: int, e: int, s_index: int, e_index: int) -> None:
         """
@@ -190,44 +145,6 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
 
         self._add_normalized(s, e, new_s_index, new_e_index)
 
-    def _add_old(self, s: int, e: int) -> None:
-        """
-        Approach is to find the smallest s' and largest e' such that [s',e') contains [s,e)
-        and add(s',e') is equivalent to add(s,e). Then:
-        - s' is either s or the left endpoint of an existing range.
-        - e' is either e or the right endpoint of an existing range.
-        That allows us to use _add_normalized.
-        """
-        if s >= e:
-            return  # empty range
-        ibl_s = self._bisect_left(s)
-        ibl_e = self._bisect_left(e)
-
-        if ibl_s > 0:
-            # There's a range [s2,e2) that starts to the left of s.
-            s2, e2 = self._inter[ibl_s - 1]
-            if e2 >= s:
-                # There's a range [s2,e2), which starts to the left of s, that either touches
-                # or overlaps [s,e). So, it's equivalent to call self.add(s2,e). Thus redefine s:
-                s = s2
-
-        if ibl_e < len(self._inter):
-            s2, e2 = self._inter[ibl_e]
-            # There's a range that starts at or after e.
-            assert e <= s2
-            if e == s2:
-                # [e,e2) is an existing range.
-                # So it's equivalent to call self.add(s,e2), so redefine e:
-                e = max(e, e2)
-
-        if ibl_e > 0:
-            s2, e2 = self._inter[ibl_e - 1]
-            if e2 > e:
-                # There's a range that starts to the left of e, and finishes strictly after e.
-                # So it's equivalent to call self.add(s,e2), so redefine e:
-                e = e2
-
-        self._add_normalized(s, e)
 
     def delete(self, s: int, e: int) -> None:
         """
