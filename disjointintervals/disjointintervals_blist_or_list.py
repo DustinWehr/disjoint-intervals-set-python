@@ -1,5 +1,5 @@
 from typing import Optional, cast, Type
-USE_CPYTHON_BISECT = False
+USE_CPYTHON_BISECT = True
 if USE_CPYTHON_BISECT:
     from bisect import bisect_right, bisect_left
 from disjointintervals.interval import *
@@ -63,7 +63,8 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
         """
         # With the default lexicographic ordering on tuples, the x - 1 ensures we'll get the index
         # of an existing range starting at x if there is one, rather the index after it.
-        ibl_x = ibl_x if ibl_x is not None else self._bisect_left(x)
+        if ibl_x is None:
+            ibl_x = self._bisect_left(x)
         if ibl_x > 0:
             assert self._inter[ibl_x - 1][0] < x
             if self._inter[ibl_x - 1][1] >= x:  # its right, open endpoint touches x
@@ -226,32 +227,42 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
 
                 return
 
+        # Note: if we get here, self._inter has not been modified, so ibl_s is still correct.
+        assert ibl_s == self._bisect_left(s)
+
         # PART 2
         # These are exactly the cases where [s,e) is NOT a subset of an existing range.
-        # assert all(not subset((s,e),r) for r in self.intervals())
+        assert all(not subset((s, e), r) for r in self.intervals())
         i = self._index_of_interval_touching_strictly_from_left(s, ibl_s)
         if i is not None:
             s1, e1 = self._inter[i]
             assert s <= e1
             # truncate [s1,e1)
             self._inter[i] = (s1, s)
+            # ibl_s remains valid.
+            assert ibl_s == self._bisect_left(s)
 
-        i = self._index_of_interval_touching_strictly_from_left(e)
+        ibl_e = self._bisect_left(e)
+        i = self._index_of_interval_touching_strictly_from_left(e, ibl_e)
         if i is not None:
             s1, e1 = self._inter[i]
             assert s < s1  # otherwise we would have been in the PART 1 cases
             assert s1 < e
             if e < e1:
-                # truncate [s1,e1)
+                # truncate [s1,e1) to [e,e1)
                 self._inter[i] = (e, e1)
+                ibl_e -= 1  # insertion position of e changed.
             else:  # e == e1
                 # [s1,e1) needs to be deleted and not replaced with anything, which will happen
                 # shortly outside this conditional.
                 pass
 
+        assert ibl_s == self._bisect_left(s)
+        assert ibl_e == self._bisect_left(e)
+        # ibl_s = self._bisect_left(s)
+        # ibl_e = self._bisect_left(e)
+
         # just remains to delete all the ranges within [s,e).
-        ibl_s = self._bisect_left(s)
-        ibl_e = self._bisect_left(e)
         del self._inter[ibl_s: ibl_e]
 
     def get_intersecting(self, s: int, e: int) -> List[Interval]:
