@@ -136,8 +136,8 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
                 # [e,e2) is an existing range, which means this call to add should effectively
                 # union [s,e) and [e,e2). So it's equivalent to call self.add(s,e2), so redefine e:
                 e = e2
-                # UNSURE!!!!!!!!!!!!
                 new_e_index = ibl_e + 1
+                assert self._bisect_left(e) == new_e_index
                 e_updated = True
 
         if not e_updated and ibl_e > 0:
@@ -147,8 +147,8 @@ class DisjointIntervalsSortedList(DisjointIntervalsInterface):
                 # to add should effectively union [s,e) and [s2,e2).
                 # So it's equivalent to call self.add(s,e2), so redefine e:
                 e = e2
-                # UNSURE
                 # new_e_index is still ibl_e
+                assert self._bisect_left(e) == new_e_index
 
         self._add_normalized(s, e, new_s_index, new_e_index)
 
