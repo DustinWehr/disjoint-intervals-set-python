@@ -1,33 +1,26 @@
 from typing import Optional, cast, Type
-USE_CPYTHON_BISECT = True
-if USE_CPYTHON_BISECT:
-    from bisect import bisect_right, bisect_left
+from bisect import bisect_right, bisect_left
+from blist import blist
+
 from disjointintervals.interval import *
 from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from disjointintervals.types.disjointintervals import Interval
 
-class DisjointIntervalsFast(DisjointIntervalsInterface):
+USE_CPYTHON_BISECT_WITH_BLIST = True
 
-    def __init__(self, intervals: List[Interval] = None,
-                       list_class: Type[List[Interval]] = list) -> None:
-        DisjointIntervalsInterface.__init__(self, intervals)
-        self._list_class = list_class
-        self._inter = list_class(cast(List[Interval], intervals if intervals else []))  # type:ignore
+class DisjointIntervalsFast(DisjointIntervalsInterface):
+    _ListOrBList = None
+
+    def __init__(self, intervals: List[Interval] = None):
+        DisjointIntervalsInterface.__init__(self)
+        self._inter = self._ListOrBList(cast(List[Interval], intervals or []))  # type:ignore
         self._inter.sort(key=lambda x: x[0])
-        if USE_CPYTHON_BISECT:
-            self._bisect_left = lambda x: bisect_left(self._inter, (x, x))
-            self._bisect_right = lambda x: bisect_right(self._inter, (x, x))
 
     def __len__(self) -> int:
         return len(self._inter)
 
     def _bisect_left(self, x: int):
-        # This method gets overwritten if USE_CPYTHON_BISECT is True.
-        # Next line would use CPython's bisect_left, which makes tests pass and is something like 10 or 20% faster,
-        # but I have no idea why it appears to work with blist, and no confidence that it's actually correct to use it.
-        # So, I've copied the python code from python 3.8's bisect.py into here instead. But you can override the use of
-        # this by setting USE_CPYTHON_BISECT = True.
-        # return bisect_left(self._inter, (x,x))
+        # Overwritten in subclasses
         a = self._inter
         lo = 0
         hi = len(a)
@@ -40,8 +33,7 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
         return lo
 
     def _bisect_right(self, x: int):
-        # See note in _bisect_left
-        # return bisect_right(self._inter, (x,x))
+        # Overwritten in subclasses
         a = self._inter
         lo = 0
         hi = len(a)
@@ -122,8 +114,8 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
 
         # Case: Any ranges that lie within [s,e) have neither s nor e as endpoints.
         # We replace all of them with [s,e), keeping the ranges to the left and right of [s,e).
-        # self._inter = self._inter[:ibl_s] + self._list_class([(s,e)]) + self._inter[ibl_e:]
-        self._inter[ibl_s:ibl_e] = self._list_class([(s, e)])
+        # self._inter = self._inter[:ibl_s] + self._ListOrBList([(s,e)]) + self._inter[ibl_e:]
+        self._inter[ibl_s:ibl_e] = self._ListOrBList([(s, e)])
 
 
 
@@ -279,7 +271,7 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
         start = max(ibl_s - 1, 0)
         end = min(ibr_e + 1, len(self._inter))
 
-        if self._list_class == list:
+        if self._ListOrBList == list:
             for i in range(start, end):
                 r = self._inter[i]
                 if intersection_nonempty(se, r):
@@ -292,3 +284,59 @@ class DisjointIntervalsFast(DisjointIntervalsInterface):
                     rv.append(r)
 
         return rv
+
+
+class DisjointIntervalsBList(DisjointIntervalsFast):
+    _ListOrBList = blist
+
+    def __init__(self, intervals: List[Interval] = None):
+        super().__init__(intervals)
+        if USE_CPYTHON_BISECT_WITH_BLIST:
+            self._bisect_left = lambda x: bisect_left(self._inter, (x, x))
+            self._bisect_right = lambda x: bisect_right(self._inter, (x, x))
+
+    # @overrides
+    def _bisect_left(self, x: int):
+        # This method gets overwritten if USE_CPYTHON_BISECT is True.
+        # Next line would use CPython's bisect_left, which makes tests pass and is something like 10 or 20% faster,
+        # but I have no idea why it appears to work with blist, and no confidence that it's actually correct to use it.
+        # So, I've copied the python code from python 3.8's bisect.py into here instead. But you can override the use of
+        # this by setting USE_CPYTHON_BISECT = True.
+        # return bisect_left(self._inter, (x,x))
+        a = self._inter
+        lo = 0
+        hi = len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if a[mid][0] < x:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo
+
+    # @overrides
+    def _bisect_right(self, x: int):
+        # See note in _bisect_left
+        # return bisect_right(self._inter, (x,x))
+        a = self._inter
+        lo = 0
+        hi = len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if x < a[mid][0]:
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
+
+
+class DisjointIntervalsList(DisjointIntervalsFast):
+    _ListOrBList = list
+
+    # @overrides
+    def _bisect_left(self, x: int):
+        return bisect_left(self._inter, (x, x))
+
+    # @overrides
+    def _bisect_right(self, x: int):
+        return bisect_right(self._inter, (x, x))

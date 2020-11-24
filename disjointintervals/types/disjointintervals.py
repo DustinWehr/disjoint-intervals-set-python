@@ -4,7 +4,7 @@ Interval = Tuple[int, int]
 
 
 class DisjointIntervalsInterface:
-    def __init__(self, intervals: Iterable[Interval] = None) -> None:
+    def __init__(self) -> None:
         pass
 
     def __eq__(self, other) -> bool:
