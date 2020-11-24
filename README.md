@@ -22,6 +22,17 @@ open source repo.
 
 # Performance
 
+## Why `blist`-based implementation is worse than `list`-based
+
+The apparent advantage of `list` over `blist` disappeared when I changed:
+```
+self._inter = self._inter[:ibl_s] + self._ListOrBList([(s,e)]) + self._inter[ibl_e:]
+```
+to
+```
+self._inter[ibl_s:ibl_e] = self._ListOrBList([(s, e)])
+``` 
+
 ## Complexity
 
 `add`, and `delete` are all asymptotically optimal in time complexity, in addition to being fast in practice; both 
