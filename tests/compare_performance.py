@@ -1,9 +1,15 @@
+from typing import TYPE_CHECKING
 import cProfile
 
-from .context_for_pytest import DisjointIntervalsSet
+if TYPE_CHECKING:
+    import DisjointIntervalsSet.tests.context_for_pytest
+else:
+    import context_for_pytest
 from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_list import DisjointIntervalsList
 from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_blist import DisjointIntervalsBList
 from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec
+
+from DisjointIntervalsSet.tests.helpers_for_tests import run_ops_timed
 
 print("""Run this script with one of
 > python3 -O tests/compare_performance.py

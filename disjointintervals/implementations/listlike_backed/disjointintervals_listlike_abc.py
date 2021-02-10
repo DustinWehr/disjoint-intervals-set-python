@@ -1,15 +1,17 @@
 from typing import Optional, cast, Type, Iterable, List, Any, Union
-
-from blist import blist  # type:ignore
+from bisect import bisect_right, bisect_left
 
 from DisjointIntervalsSet.disjointintervals.implementations.interval import subset, intersection_nonempty
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
+# from disjointintervals.implementations.interval import subset, intersection_nonempty
+# from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
+# from disjointintervals.types.disjointintervals import Interval
 
 
 class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
-    _ListOrBList: Type[Union[list, blist]] = list
+    _ListOrBList: Type[Union[list, 'blist']] = list  # type:ignore
 
     def __init__(self, intervals: Iterable[Interval] = None):
         DisjointIntervalsInterface.__init__(self)
@@ -23,38 +25,19 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
         self._inter[start:stop_exclusive] = self._ListOrBList([newelem])
 
     def _bisect_left(self, x: int):
-        # Overwritten in subclasses
-        a = self._inter
-        lo = 0
-        hi = len(a)
-        while lo < hi:
-            mid = (lo + hi) // 2
-            if a[mid][0] < x:
-                lo = mid + 1
-            else:
-                hi = mid
-        return lo
+        return bisect_left(self._inter, (x,x))
 
     def _bisect_right(self, x: int):
-        # Overwritten in subclasses
-        a = self._inter
-        lo = 0
-        hi = len(a)
-        while lo < hi:
-            mid = (lo + hi) // 2
-            if x < a[mid][0]:
-                hi = mid
-            else:
-                lo = mid + 1
-        return lo
+        return bisect_right(self._inter, (x,x))
 
     def intervals(self) -> List[Interval]:
         return self._inter
 
-    def _index_of_interval_touching_strictly_from_left(self, x: int, ibl_x=None) -> Optional[int]:
+    def _index_of_interval_touching_strictly_from_left(self, x: int, ibl_x=None) -> int:
         """
         If there is a range that starts strictly before x, and either contains x or has x
-        as its right open endpoint, then return the index of that range. Otherwise return None.
+        as its right open endpoint, then return the index of that range.
+        Otherwise return -1.
         """
         # With the default lexicographic ordering on tuples, the x - 1 ensures we'll get the index
         # of an existing range starting at x if there is one, rather the index after it.
@@ -64,7 +47,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
             assert self._inter[ibl_x - 1][0] < x
             if self._inter[ibl_x - 1][1] >= x:  # its right, open endpoint touches x
                 return ibl_x - 1
-        return None
+        return -1
 
     def _add_normalized(self, s: int, e: int, s_index: int, e_index: int) -> None:
         """
@@ -194,9 +177,9 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
                 j -= 1
             else:
                 # There is no range that starts before s either.
-                j = None
+                j = -1
 
-        if j is not None:
+        if j != -1:
             s1, e1 = self._inter[j]
             if s1 <= s and e <= e1:
                 # PART 1
@@ -226,7 +209,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
         # These are exactly the cases where [s,e) is NOT a subset of an existing range.
         assert all(not subset((s, e), r) for r in self.intervals())
         i = self._index_of_interval_touching_strictly_from_left(s, ibl_s)
-        if i is not None:
+        if i != -1:
             s1, e1 = self._inter[i]
             assert s <= e1
             # truncate [s1,e1)
@@ -236,7 +219,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
 
         ibl_e = self._bisect_left(e)
         i = self._index_of_interval_touching_strictly_from_left(e, ibl_e)
-        if i is not None:
+        if i != -1:
             s1, e1 = self._inter[i]
             assert s < s1  # otherwise we would have been in the PART 1 cases
             assert s1 < e
