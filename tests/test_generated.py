@@ -4,6 +4,7 @@ from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disj
 from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_blist import DisjointIntervalsBList
 from .helpers_for_tests import run_ops
 
+# will be called by pytest
 def test_small_opseq(opseq):
     ranges_spec = DisjointIntervalsSlowSpec()
     run_ops(ranges_spec, opseq)

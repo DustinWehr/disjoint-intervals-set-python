@@ -1,17 +1,19 @@
-from typing import Optional, cast, Type, Iterable, List
+from typing import Optional, cast, Type, Iterable, List, Any, Union
+
+from blist import blist  # type:ignore
 
 from DisjointIntervalsSet.disjointintervals.implementations.interval import subset, intersection_nonempty
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
 
+
 class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
-    _ListOrBList = None
+    _ListOrBList: Type[Union[list, blist]] = list
 
     def __init__(self, intervals: Iterable[Interval] = None):
         DisjointIntervalsInterface.__init__(self)
-        # self._inter = self._ListOrBList(cast(Iterable[Interval], intervals or []))  # type:ignore
-        self._inter = self._ListOrBList(intervals or [])  # type:ignore
+        self._inter = self._ListOrBList(intervals if intervals else [])
         self._inter.sort(key=lambda x: x[0])
 
     def __len__(self) -> int:
@@ -63,7 +65,6 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
             if self._inter[ibl_x - 1][1] >= x:  # its right, open endpoint touches x
                 return ibl_x - 1
         return None
-
 
     def _add_normalized(self, s: int, e: int, s_index: int, e_index: int) -> None:
         """
@@ -165,7 +166,6 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
                 # new_e_index is still ibl_e
 
         self._add_normalized(s, e, new_s_index, new_e_index)
-
 
     def delete(self, s: int, e: int) -> None:
         """

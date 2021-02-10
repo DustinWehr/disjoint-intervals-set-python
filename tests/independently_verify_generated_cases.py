@@ -1,5 +1,3 @@
-# python verify_generated_cases
-
 from typing import List, Iterable, NamedTuple, Set
 
 # types and the test case lists should be the only dependencies
@@ -9,7 +7,7 @@ from .generate_testcases import add_cases, del_cases
 def interval_set_to_element_set(ranges: Iterable[Interval]) -> Set[int]:
     return set(x for raange in (range(left,right) for (left,right) in ranges) for x in raange)
     
-def verify_add_case(case: KTestCase):
+def verify_add_case(case: ATestCase):
     assert case.opseq[-1][0] == 'a'
     ranges_to_add = (op[1] for op in case.opseq)
     # print(ranges_to_add)
@@ -17,7 +15,7 @@ def verify_add_case(case: KTestCase):
     expected_as_set = interval_set_to_element_set(case.expected) 
     assert computed_as_set == expected_as_set
 
-def verify_del_case(case: KTestCase):
+def verify_del_case(case: ATestCase):
     assert case.opseq[-1][0] == 'd'
 
     ranges = [op[1] for op in case.opseq]

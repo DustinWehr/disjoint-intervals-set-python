@@ -1,13 +1,9 @@
+from typing import List
+from .types_for_tests import RangeOpSeq
+
 SIZES = range(1, 4)
-
-
-def range2str(r):
-    return f"[{r[0]},{r[1]})"
-
-
-add_opseqs = []
-del_opseqs = []
-
+add_opseqs: List[RangeOpSeq] = []
+del_opseqs: List[RangeOpSeq] = []
 for size in SIZES:
     # when close == True, makes the initial ranges as close as possible without getting joined
     for close in {False, True}:
@@ -23,3 +19,6 @@ for size in SIZES:
         case_init = [('a', r) for r in init_ranges]
         add_opseqs.extend((case_init + [('a', r2)] for r2 in test_ranges))
         del_opseqs.extend((case_init + [('d', r2)] for r2 in test_ranges))
+
+# def range2str(r):
+#     return f"[{r[0]},{r[1]})"

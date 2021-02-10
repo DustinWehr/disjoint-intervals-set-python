@@ -1,5 +1,6 @@
 from .context_for_pytest import DisjointIntervalsSet
-from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec
+from DisjointIntervalsSet.disjointintervals.implementations\
+    .slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec
 from .types_for_tests import *
 from .generate_op_sequences import add_opseqs, del_opseqs
 from .helpers_for_tests import run_ops
@@ -13,8 +14,8 @@ def run_opseq(opseq: RangeOpSeq) -> List[Interval]:
     return dranges.intervals()
 
 
-add_cases: List[KTestCase] = [KTestCase(opseq, run_opseq(opseq)) for opseq in add_opseqs]
-del_cases: List[KTestCase] = [KTestCase(opseq, run_opseq(opseq)) for opseq in del_opseqs]
+add_cases: List[ATestCase] = [ATestCase(opseq, run_opseq(opseq)) for opseq in add_opseqs]
+del_cases: List[ATestCase] = [ATestCase(opseq, run_opseq(opseq)) for opseq in del_opseqs]
 
 print(f"{len(add_cases) + len(del_cases)} GENERATED CASES")
 

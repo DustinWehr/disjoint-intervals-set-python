@@ -9,7 +9,7 @@ from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Inter
 class DisjointIntervalsSlowSpec(DisjointIntervalsInterface):
     def __init__(self, intervals: Iterable[Interval] = None) -> None:
         DisjointIntervalsInterface.__init__(self)
-        self._intervals: List[Interval] = intervals or []
+        self._intervals = list(intervals) if intervals else []
 
     def intervals(self) -> List[Interval]:
         return self._intervals

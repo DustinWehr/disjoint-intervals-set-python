@@ -1,7 +1,7 @@
 from bisect import bisect_right, bisect_left
-from array import array
 
 from .disjointintervals_listlike_abc import DisjointIntervalsListlikeABC
+
 
 class DisjointIntervalsList(DisjointIntervalsListlikeABC):
     _ListOrBList = list

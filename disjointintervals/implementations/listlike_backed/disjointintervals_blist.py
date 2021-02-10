@@ -1,7 +1,7 @@
 from typing import Iterable
 from bisect import bisect_right, bisect_left
 try:
-    from blist import blist
+    from blist import blist  # type:ignore
 except Exception as e:
     blist = None
     print(e)
