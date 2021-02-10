@@ -1,8 +1,8 @@
-from typing import Optional, cast, Type, Iterable
+from typing import Optional, cast, Type, Iterable, List
 
-from disjointintervals.interval import *
-from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
-from disjointintervals.types.disjointintervals import Interval
+from DisjointIntervalsSet.disjointintervals.implementations.interval import subset, intersection_nonempty
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
 
 class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
@@ -10,11 +10,15 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
 
     def __init__(self, intervals: Iterable[Interval] = None):
         DisjointIntervalsInterface.__init__(self)
-        self._inter = self._ListOrBList(cast(Iterable[Interval], intervals or []))  # type:ignore
+        # self._inter = self._ListOrBList(cast(Iterable[Interval], intervals or []))  # type:ignore
+        self._inter = self._ListOrBList(intervals or [])  # type:ignore
         self._inter.sort(key=lambda x: x[0])
 
     def __len__(self) -> int:
         return len(self._inter)
+
+    def _replace_slice(self, start, stop_exclusive, newelem):
+        self._inter[start:stop_exclusive] = self._ListOrBList([newelem])
 
     def _bisect_left(self, x: int):
         # Overwritten in subclasses
@@ -111,10 +115,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
 
         # Case: Any ranges that lie within [s,e) have neither s nor e as endpoints.
         # We replace all of them with [s,e), keeping the ranges to the left and right of [s,e).
-        # self._inter = self._inter[:ibl_s] + self._ListOrBList([(s,e)]) + self._inter[ibl_e:]
-        self._inter[ibl_s:ibl_e] = self._ListOrBList([(s, e)])
-
-
+        self._replace_slice(ibl_s, ibl_e, (s, e))
 
     def add(self, s: int, e: int) -> None:
         """

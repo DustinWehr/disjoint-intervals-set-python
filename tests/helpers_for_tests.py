@@ -4,13 +4,12 @@ from typing import List, Tuple, cast, Type, Set
 from random import random as rand01
 import random
 
-from .context import disjointintervals
-from disjointintervals.types.disjointintervals import Interval
-from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
-from disjointintervals.disjointintervals_slow4spec import DisjointIntervalsSlowSpec
-from disjointintervals.disjointintervals_list import DisjointIntervalsList
-from disjointintervals.disjointintervals_blist import DisjointIntervalsBList
-from disjointintervals.disjointintervals_blistsortedlist import DisjointIntervalsSortedList
+# from .context import disjointintervals
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
+from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec
+from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_list import DisjointIntervalsList
+from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_blist import DisjointIntervalsBList
 
 RangeOp = Tuple[str, Interval]
 
@@ -71,12 +70,12 @@ def run_ops_timed(ranges: DisjointIntervalsInterface,
     for op in ops:
         run_op(ranges, op)
         newsize = len(ranges)
-        if abs(newsize - last_inc_notif) > SIZE_CHANGE_NOTIF_THRESH:
-            print(f"# intervals changed since last notification by {newsize - last_inc_notif} to {newsize}.")
-            last_inc_notif = newsize
-        # if abs(newsize - cursize) > SIZE_CHANGE_NOTIF_THRESH:
-        #     print(f"# intervals changed in one op by {newsize - cursize} to {newsize}.")
-        cursize = newsize
+        # if abs(newsize - last_inc_notif) > SIZE_CHANGE_NOTIF_THRESH:
+        #     print(f"# intervals changed since last notification by {newsize - last_inc_notif} to {newsize}.")
+        #     last_inc_notif = newsize
+        # # if abs(newsize - cursize) > SIZE_CHANGE_NOTIF_THRESH:
+        # #     print(f"# intervals changed in one op by {newsize - cursize} to {newsize}.")
+        # cursize = newsize
     print(f"{time.perf_counter() - start} seconds.")
 
 

@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from disjointintervals.types.disjointintervals import Interval
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
 # NOTE: THERE ARE MANY INEFFICIENT FUNCTIONS IN HERE.
 # THEY ARE ONLY USED IN SPECIFICATION CODE AND ASSERTIONS.

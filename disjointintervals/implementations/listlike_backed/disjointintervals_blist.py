@@ -1,10 +1,16 @@
 from typing import Iterable
 from bisect import bisect_right, bisect_left
-from blist import blist
+try:
+    from blist import blist
+except Exception as e:
+    blist = None
+    print(e)
+    print("You must install the blist package to use this module.")
+    exit()
 
-from disjointintervals.disjointintervals_listlike_abc import DisjointIntervalsListlikeABC, Interval
+from .disjointintervals_listlike_abc import DisjointIntervalsListlikeABC, Interval
 
-USE_CPYTHON_BISECT_WITH_BLIST = False
+USE_CPYTHON_BISECT_WITH_BLIST = True
 
 
 class DisjointIntervalsBList(DisjointIntervalsListlikeABC):
@@ -16,6 +22,10 @@ class DisjointIntervalsBList(DisjointIntervalsListlikeABC):
             self._bisect_left = lambda x: bisect_left(self._inter, (x, x))
             self._bisect_right = lambda x: bisect_right(self._inter, (x, x))
 
+    def _replace_slice(self, start, stop_exclusive, newelem):
+        del self._inter[start:stop_exclusive]
+        self._inter.insert(start, newelem)
+
     # @overrides
     def _bisect_left(self, x: int):
         # This method gets overwritten if USE_CPYTHON_BISECT is True.
@@ -23,7 +33,7 @@ class DisjointIntervalsBList(DisjointIntervalsListlikeABC):
         # but I have no idea why it appears to work with blist, and no confidence that it's actually correct to use it.
         # So, I've copied the python code from python 3.8's bisect.py into here instead. But you can override the use of
         # this by setting USE_CPYTHON_BISECT = True.
-        # return bisect_left(self._inter, (x,x))
+        return bisect_left(self._inter, (x,x))
         a = self._inter
         lo = 0
         hi = len(a)
@@ -38,7 +48,7 @@ class DisjointIntervalsBList(DisjointIntervalsListlikeABC):
     # @overrides
     def _bisect_right(self, x: int):
         # See note in _bisect_left
-        # return bisect_right(self._inter, (x,x))
+        return bisect_right(self._inter, (x,x))
         a = self._inter
         lo = 0
         hi = len(a)

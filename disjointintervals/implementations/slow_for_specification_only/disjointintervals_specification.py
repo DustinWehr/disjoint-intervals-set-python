@@ -1,8 +1,9 @@
-from typing import Iterable
+from typing import Iterable, List
 
-from disjointintervals.interval import *
-from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
-from disjointintervals.types.disjointintervals import Interval
+
+from DisjointIntervalsSet.disjointintervals.implementations.interval import *
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
 
 class DisjointIntervalsSlowSpec(DisjointIntervalsInterface):

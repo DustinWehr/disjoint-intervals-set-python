@@ -1,7 +1,5 @@
-# from disjointintervals.DisjointIntervalsParametric import DisjointIntervalsParametric
-# from disjointintervals.DisjointIntervalsFast import DisjointIntervalsFast
-from disjointintervals.disjointintervals_slow4spec import DisjointIntervalsSlowSpec
-from .context import disjointintervals
+from .context_for_pytest import DisjointIntervalsSet
+from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec
 from .types_for_tests import *
 from .generate_op_sequences import add_opseqs, del_opseqs
 from .helpers_for_tests import run_ops
