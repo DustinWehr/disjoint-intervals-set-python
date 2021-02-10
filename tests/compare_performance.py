@@ -1,10 +1,5 @@
-from typing import TYPE_CHECKING
 import cProfile
 
-if TYPE_CHECKING:
-    import DisjointIntervalsSet.tests.context_for_pytest
-else:
-    import context_for_pytest
 from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_list import DisjointIntervalsList
 from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_blist import DisjointIntervalsBList
 from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec

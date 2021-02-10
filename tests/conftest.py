@@ -1,4 +1,3 @@
-from .context_for_pytest import DisjointIntervalsSet
 from .generate_op_sequences import add_opseqs, del_opseqs
 from .generate_testcases import add_cases, del_cases
 

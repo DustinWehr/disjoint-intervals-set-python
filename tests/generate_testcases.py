@@ -1,4 +1,3 @@
-from .context_for_pytest import DisjointIntervalsSet
 from DisjointIntervalsSet.disjointintervals.implementations\
     .slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec
 from .types_for_tests import *

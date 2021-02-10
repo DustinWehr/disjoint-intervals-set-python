@@ -1,7 +1,3 @@
-from typing import Type
-
-from .context_for_pytest import DisjointIntervalsSet
-from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from .helpers_for_tests import run_ops, allimpl, run_ops_parallel_compare_many
 
 # allimpl makes the test run against all the DisjointIntervalsInterface implementations enabled in

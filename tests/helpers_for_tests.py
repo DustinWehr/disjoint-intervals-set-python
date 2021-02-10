@@ -4,7 +4,6 @@ from typing import List, Tuple, cast, Type, Set
 from random import random as rand01
 import random
 
-# from .context import disjointintervals
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec

@@ -1,8 +1,10 @@
 # Todo
 
+- USE MUTABLE STRUCTS FOR INTERVALS 
 - Mypy
 - Optimal `get_intersecting`
 - Remove sortedlist implementation?
+- Try using as part of list data structure that supports efficient insert/delete ops.
 
 ## Done
 
