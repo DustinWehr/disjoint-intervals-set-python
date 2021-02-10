@@ -1,13 +1,9 @@
-from typing import Optional, cast, Type, Iterable, List, Any, Union
+from typing import Type, Iterable, List, Union
 from bisect import bisect_right, bisect_left
 
 from DisjointIntervalsSet.disjointintervals.implementations.interval import subset, intersection_nonempty
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
-
-# from disjointintervals.implementations.interval import subset, intersection_nonempty
-# from disjointintervals.types.disjointintervals import DisjointIntervalsInterface
-# from disjointintervals.types.disjointintervals import Interval
 
 
 class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):

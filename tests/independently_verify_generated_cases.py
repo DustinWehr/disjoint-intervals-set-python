@@ -1,4 +1,4 @@
-from typing import List, Iterable, NamedTuple, Set
+from typing import Set
 
 # types and the test case lists should be the only dependencies
 from .types_for_tests import *

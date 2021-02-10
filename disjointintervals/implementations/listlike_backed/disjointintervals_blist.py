@@ -4,7 +4,7 @@ except Exception as e:
     blist = None
     print(e)
     print("You must install the blist package to use this module.")
-    exit()
+
 
 from .disjointintervals_listlike_abc import DisjointIntervalsListlikeABC, Interval
 

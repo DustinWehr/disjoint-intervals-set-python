@@ -1,14 +1,24 @@
 import cProfile
 
-from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_list import DisjointIntervalsList
-from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_blist import DisjointIntervalsBList
-from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec
+try:
+    from blist import blist  # type:ignore
+    from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed \
+        .disjointintervals_blist import DisjointIntervalsBList
+    skip_blist = False
+except Exception as e:
+    print("Skipping performance test for blist-based implementation, since it's not installed.")
+    skip_blist = True
+
+from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed\
+    .disjointintervals_list import DisjointIntervalsList
+from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only\
+    .disjointintervals_specification import DisjointIntervalsSlowSpec
 
 from DisjointIntervalsSet.tests.helpers_for_tests import run_ops_timed
 
 print("""Run this script with one of
-> python3 -O tests/compare_performance.py
-> pypy3 -O tests/compare_performance.py
+> python3 -O DisjointIntervalsSet/tests/compare_performance.py
+> pypy3 -O DisjointIntervalsSet/tests/compare_performance.py
 (or whatever your python 3.x cpython or pypy executable is called)
 """)
 
@@ -26,10 +36,12 @@ if __name__ == '__main__':
 
     rspec = DisjointIntervalsSlowSpec()
     rarray = DisjointIntervalsList()
-    rblist = DisjointIntervalsBList()
+    if not skip_blist:
+        rblist = DisjointIntervalsBList()
 
     # rspec takes too long on ops1
     # cProfile.run("run_ops_timed(rspec, ops1)", sort=1)
 
     cProfile.run("run_ops_timed(rarray, ops1)", sort=1)
-    cProfile.run("run_ops_timed(rblist, ops1)", sort=1)
+    if not skip_blist:
+        cProfile.run("run_ops_timed(rblist, ops1)", sort=1)
