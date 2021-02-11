@@ -1,13 +1,13 @@
 # Todo
 
-- USE MUTABLE STRUCTS FOR INTERVALS 
-- Mypy
-- Optimal `get_intersecting`
-- Remove sortedlist implementation?
-- Try using as part of list data structure that supports efficient insert/delete ops.
 
 ## Done
 
+- tried. only helped very slightly, and I think had some drawbacks. USE MUTABLE STRUCTS FOR INTERVALS - 
+- pass. Optimal `get_intersecting`
+- pass. Try using as part of list data structure that supports efficient insert/delete ops.
+- done. Mypy
+- done. Remove sortedlist implementation?
 - Look into CPython's `bisect` for `blist`; didn't look at the C code.
 See commit 21ba8e56 for approach taken.
 - Rename `DisjointIntervalsFast`, make it an ABC, and give list and blist implementations their own classes.
@@ -26,7 +26,11 @@ open source repo.
 
 ## Why `blist`-based implementation is worse than `list`-based
 
-The apparent advantage of `list` over `blist` disappeared when I changed:
+I think it is just because blist's get and set are significantly slower.
+
+**NO the following explanation appears wrong, based on 9 Feb 2021 tests**:
+
+The apparent advantage of `blist` over `list` disappeared when I changed:
 ```
 self._inter = self._inter[:ibl_s] + self._ListOrBList([(s,e)]) + self._inter[ibl_e:]
 ```
@@ -56,7 +60,7 @@ In order to check performance with assertions turned off:
 ```
 tests$ python3 - O compare_performance.py
 ```
-or (CURRENTLY NOT WORKING EXCEPT WITH `list`-based and `DisjointIntervalsSlowSpec`-based IMPLEMENTATION; will be addressed later)
+or 
 ```
 $ pypy3 - O compare_performance.py
 ```

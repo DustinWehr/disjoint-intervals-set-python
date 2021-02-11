@@ -2,8 +2,8 @@ from typing import List, Tuple
 
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
-# NOTE: THERE ARE MANY INEFFICIENT FUNCTIONS IN HERE.
-# BUT THEY ARE ONLY USED IN SPECIFICATION CODE AND ASSERTIONS.
+# NOTE: Some of the functions in here are very inefficient, but they are 
+# only used in specification code and assertions.
 
 
 def nonempty(r: Interval) -> bool:
@@ -101,15 +101,17 @@ def intersection_nonempty(r1: Interval, r2: Interval) -> bool:
     False
     >>> intersection_nonempty((4,6),(5,6))
     True
-    """
+    """    
     if empty(r1) or empty(r2):
         return False
-    if r1[0] == r2[0]:
-        return True
-    elif r1[0] < r2[0]:
-        return r1[1] > r2[0]
+    elif r1[0] == r2[0]: 
+        return True  # both nonempty and same left endpoint
+    elif r1[0] < r2[0]: 
+        return r2[0] < r1[1]  # r1 starts first, so r2 needs to start before r1 ends for 
+                              # intersection to be nonempty
     else:
-        return r2[1] > r1[0]
+        return r1[0] < r2[1]  # r2 starts first, so r1 needs to start before r2 ends for 
+                              # intersection to be nonempty
 
 
 if __name__ == "__main__":

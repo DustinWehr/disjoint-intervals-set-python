@@ -1,7 +1,7 @@
 from typing import Iterable, List
 
 
-from DisjointIntervalsSet.disjointintervals.implementations.interval import *
+from DisjointIntervalsSet.disjointintervals.implementations.interval_util import *
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 

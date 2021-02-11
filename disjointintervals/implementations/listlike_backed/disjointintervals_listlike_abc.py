@@ -1,11 +1,12 @@
 from typing import Type, Iterable, List, Union
 from bisect import bisect_right, bisect_left
 
-from DisjointIntervalsSet.disjointintervals.implementations.interval import subset, intersection_nonempty
+from DisjointIntervalsSet.disjointintervals.implementations.interval_util import subset, intersection_nonempty
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
 from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
 
+# ABC = Abstract Base Class
 class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
     _ListOrBList: Type[Union[list, 'blist']] = list  # type:ignore
 
@@ -22,6 +23,14 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
 
     def _bisect_left(self, x: int):
         return bisect_left(self._inter, (x,x))
+
+    # makes list implementation worse. too much overhead.
+    # def _bisect_left(self, x: int, left_bound_start=0, right_bound_start=None):
+    #     return bisect_left(self._inter, (x,x), left_bound_start, right_bound_start or len(self))
+
+    # even this makes both implementations slower:
+    # def _bisect_left(self, x: int, left_bound_start=0):
+    #     return bisect_left(self._inter, (x,x), left_bound_start)
 
     def _bisect_right(self, x: int):
         return bisect_right(self._inter, (x,x))
@@ -55,10 +64,12 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
         - There is no existing range that starts in [s,e] that ends at or after e (i.e. whose
           right endpoint is greater than e).
         """
-        # "ibl_s" for index of bisect_left on s
-        ibl_s = s_index
-        # ibl_s = self._bisect_left(s)
+        assert e_index == self._bisect_left(e)
+        assert s_index == self._bisect_left(s)
 
+        # "ibl_s" for *i*ndex of *b*isect_*l*eft on s
+        ibl_s = s_index
+        
         if ibl_s == len(self._inter):
             # no intersection
             self._inter.append((s,e))
@@ -71,7 +82,6 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
             if e == e2:
                 return  # [s,e) is already a range. Nothing to do.
             # e2 < e
-            # ibl_e = self._bisect_left(e)
             ibl_e = e_index
             # We right-extend [s,e2) to [s,e) and then delete any ranges within [s,e)
             self._inter[ibl_s] = (s,e)
@@ -120,6 +130,10 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
                 new_s_index = ibl_s - 1
 
         ibl_e = self._bisect_left(e)
+        # correct I think, but the extra arithmetic and len call makes list implementation worse:
+        # ibl_e = self._bisect_left(e, ibl_s, min(len(self), ibl_s + (e-s)))
+        # even this makes both implementations slower:
+        # ibl_e = self._bisect_left(e, ibl_s)
         new_e_index = ibl_e
         e_updated = False
         if ibl_e < len(self._inter):
@@ -130,8 +144,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
                 # [e,e2) is an existing range, which means this call to add should effectively
                 # union [s,e) and [e,e2). So it's equivalent to call self.add(s,e2), so redefine e:
                 e = e2
-                # UNSURE!!!!!!!!!!!!
-                new_e_index = ibl_e + 1
+                new_e_index = ibl_e + 1  # TODO: explain
                 e_updated = True
 
         if not e_updated and ibl_e > 0:
@@ -141,8 +154,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
                 # to add should effectively union [s,e) and [s2,e2).
                 # So it's equivalent to call self.add(s,e2), so redefine e:
                 e = e2
-                # UNSURE
-                # new_e_index is still ibl_e
+                # new_e_index is still ibl_e # TODO: explain
 
         self._add_normalized(s, e, new_s_index, new_e_index)
 
