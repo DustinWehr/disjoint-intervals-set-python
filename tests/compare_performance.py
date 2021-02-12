@@ -42,6 +42,11 @@ if __name__ == '__main__':
     # rspec takes too long on ops1
     # cProfile.run("run_ops_timed(rspec, ops1)", sort=1)
 
+    run_ops_timed(rarray, ops1)
+    if not skip_blist:
+        run_ops_timed(rblist, ops1)
+
+
     cProfile.run("run_ops_timed(rarray, ops1)", sort=1)
     if not skip_blist:
         cProfile.run("run_ops_timed(rblist, ops1)", sort=1)
