@@ -4,6 +4,7 @@ from .types_for_tests import *
 from .generate_op_sequences import add_opseqs, del_opseqs
 from .helpers_for_tests import run_ops
 
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
 def run_opseq(opseq: RangeOpSeq) -> List[Interval]:
     # dranges = DisjointIntervalsFast()
@@ -33,3 +34,7 @@ def test_pytest_showme_the_cases():
 
     # causes pytest to show output.
     assert False
+
+
+if __name__ == '__main__':
+    test_pytest_showme_the_cases()

@@ -1,3 +1,4 @@
+from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_array import DisjointIntervalsArray
 from .helpers_for_tests import run_ops, allimpl, run_ops_parallel_compare_many
 
 # allimpl makes the test run against all the DisjointIntervalsInterface implementations enabled in
@@ -65,12 +66,19 @@ def test_add_join0(C=None):
 
 
 @allimpl
-def test_add_join2(C=None):
-    state = C([(-10, -5), (10, 20), (100, 101)])
-    state.add(1, 2)
-    state.add(10, 20)
-    state.add(2, 3)
-    assert state == C([(-10, -5), (1, 3), (10, 20), (100, 101)])
+def test_add_join2(C=None):    
+    if C == DisjointIntervalsArray:
+        state = C([(0, 5), (10, 20), (100, 101)])
+        state.add(1, 2)
+        state.add(10, 20)
+        state.add(2, 3)
+        assert state == C([(0, 5), (10, 20), (100, 101)])
+    else:
+        state = C([(-10, -5), (10, 20), (100, 101)])
+        state.add(1, 2)
+        state.add(10, 20)
+        state.add(2, 3)
+        assert state == C([(-10, -5), (1, 3), (10, 20), (100, 101)])
 
 
 @allimpl
@@ -109,15 +117,24 @@ def test_add_from_rand(C=None):
 
 @allimpl
 def test_delete_no_overlap(C=None):
-    state = C([(1, 6)])
-    state.delete(-3, -1)
-    assert state == C([(1, 6)])
+    if C == DisjointIntervalsArray:
+        state = C([(3, 6)])
+        state.delete(0, 2)
+        assert state == C([(3, 6)])
+    else:
+        state = C([(1, 6)])
+        state.delete(-3, -1)
+        assert state == C([(1, 6)])
 
 
 @allimpl
 def test_delete_full_overlap(C=None):
-    state = C([(1, 6)])
-    state.delete(-1, 10)
+    if C == DisjointIntervalsArray:
+        state = C([(1, 6)])
+        state.delete(0, 10)
+    else:
+        state = C([(1, 6)])
+        state.delete(-1, 10)
     assert state == C([])
 
 
@@ -146,7 +163,10 @@ def test_delete_from_rand(C=None):
 def test_delete_many(C=None):
     state = C([])
     state.add(0, 30)
-    state.delete(-10, 2)
+    if C == DisjointIntervalsArray:
+        state.delete(0, 2)
+    else:
+        state.delete(-10, 2)
     state.delete(5, 8)
     state.delete(2, 3)
     state.delete(25, 35)
@@ -180,26 +200,47 @@ def test_delete_last_el_overlap(C=None):
 @allimpl
 def test_add_delete_misc(C=None):
     state = C([])
-    state.add(-5, 5)
-    state.add(10, 15)
-    state.add(8, 15)
-    assert state == C([(-5, 5), (8, 15)])
-    state.delete(10, 11)
-    assert state == C([(-5, 5), (8, 10), (11, 15)])
-    state.delete(-100, 100)
-    assert state == C([])
+    if C == DisjointIntervalsArray:
+        state.add(0, 5)
+        state.add(10, 15)
+        state.add(8, 15)
+        assert state == C([(0, 5), (8, 15)])
+        state.delete(10, 11)
+        assert state == C([(0, 5), (8, 10), (11, 15)])
+        state.delete(0, 100)
+        assert state == C([])
+        state.add(0, 5)
+    else:
+        state.add(-5, 5)
+        state.add(10, 15)
+        state.add(8, 15)
+        assert state == C([(-5, 5), (8, 15)])
+        state.delete(10, 11)
+        assert state == C([(-5, 5), (8, 10), (11, 15)])
+        state.delete(-100, 100)
+        assert state == C([])
 
 
 @allimpl
 def test_bleh(C=None):
     state = C([])
-    state.add(-5, 5)
-    state.add(10, 15)
-    assert state == C([(-5, 5), (10, 15)])
-    state.add(7, 11)
-    assert state == C([(-5, 5), (7, 15)])
-    state.delete(-100, 100)
-    assert state == C([])
+    if C == DisjointIntervalsArray:
+        state.add(0, 5)
+        state.add(10, 15)
+        assert state == C([(0, 5), (10, 15)])
+        state.add(7, 11)
+        assert state == C([(0, 5), (7, 15)])
+        state.delete(-100, 100)
+        assert state == C([])
+    else:
+        state = C([])
+        state.add(-5, 5)
+        state.add(10, 15)
+        assert state == C([(-5, 5), (10, 15)])
+        state.add(7, 11)
+        assert state == C([(-5, 5), (7, 15)])
+        state.delete(-100, 100)
+        assert state == C([])
 
 
 @allimpl

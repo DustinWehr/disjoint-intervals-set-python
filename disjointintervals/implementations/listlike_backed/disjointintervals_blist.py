@@ -1,3 +1,5 @@
+from typing import Any
+
 try:
     from blist import blist  # type:ignore
 except Exception as e:
@@ -10,7 +12,8 @@ from .disjointintervals_listlike_abc import DisjointIntervalsListlikeABC, Interv
 
 
 class DisjointIntervalsBList(DisjointIntervalsListlikeABC):
-    _ListOrBList = blist
+    def _listlist_constructor(self, itemsiter) -> Any:
+        return blist(itemsiter)
 
     # @overrides
     def _replace_slice(self, start, stop_exclusive, newelem):

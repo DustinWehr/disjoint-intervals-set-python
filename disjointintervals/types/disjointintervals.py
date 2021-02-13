@@ -1,10 +1,14 @@
-from typing import List, Iterable, Tuple
+from typing import List, Iterable, Tuple, Any, TypeVar
 
-Interval = Tuple[int, int]
-
+Interval = Any
+TupInterval = Tuple[int, int]
+I = TypeVar("I")
 
 class DisjointIntervalsInterface:
     def __init__(self) -> None:
+        pass
+
+    def _listlist_constructor(self, itemsiter) -> Any:
         pass
 
     def __eq__(self, other) -> bool:
@@ -22,7 +26,7 @@ class DisjointIntervalsInterface:
     def __len__(self) -> int:
         raise NotImplementedError
 
-    def intervals(self) -> List[Interval]:
+    def intervals(self) -> List[TupInterval]:
         pass
 
     def add(self, start: int, end: int) -> None:
@@ -31,6 +35,6 @@ class DisjointIntervalsInterface:
     def delete(self, start: int, end: int) -> None:
         pass
 
-    def get_intersecting(self, start: int, end: int) -> List[Interval]:
+    def get_intersecting(self, start: int, end: int) -> List[TupInterval]:
         pass
 

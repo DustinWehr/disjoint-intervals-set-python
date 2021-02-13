@@ -1,6 +1,7 @@
-from typing import List, Tuple
+from typing import List, Tuple, Any
 
-from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
+# from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
+Interval = Any
 
 # NOTE: Some of the functions in here are very inefficient, but they are 
 # only used in specification code and assertions.
@@ -88,6 +89,12 @@ def separated(r1: Interval, r2: Interval) -> bool:
     # following condition is false exactly when r1 and r2 either overlap or are adjacent
     return r1[1] < r2[0]
 
+
+def packed_to_pair(x:int) -> Tuple[int,int]:
+    return x >> 32, x & 0b0000000000000000000000000000000011111111111111111111111111111111
+
+def packed_intersection_nonempty(r1: int, r2: int) -> bool:
+    return intersection_nonempty(packed_to_pair(r1), packed_to_pair(r2))
 
 def intersection_nonempty(r1: Interval, r2: Interval) -> bool:
     """

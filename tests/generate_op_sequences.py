@@ -1,6 +1,8 @@
 from typing import List
 from .types_for_tests import RangeOpSeq
 
+NONNEGATIVE = True
+
 SIZES = range(1, 4)
 add_opseqs: List[RangeOpSeq] = []
 del_opseqs: List[RangeOpSeq] = []
@@ -8,7 +10,10 @@ for size in SIZES:
     # when close == True, makes the initial ranges as close as possible without getting joined
     for close in {False, True}:
         init_ranges_nonneg = [(x - (1 if close else 0), x + 2) for x in range(0, size * 4, 4)]
-        init_ranges = [((x - (size * 4 - 2) // 2), (y - (size * 4 - 2) // 2)) for x, y in init_ranges_nonneg]
+        if NONNEGATIVE:
+            init_ranges = init_ranges_nonneg
+        else:
+            init_ranges = [((x - (size * 4 - 2) // 2), (y - (size * 4 - 2) // 2)) for x, y in init_ranges_nonneg]
 
         endpoints = [x[0] for x in init_ranges] + [x[1] for x in init_ranges]
         test_endpoints = list(range(min(endpoints) - 1, max(endpoints) + 2, 1))

@@ -9,6 +9,7 @@ from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Disjo
 from DisjointIntervalsSet.disjointintervals.implementations.slow_for_specification_only.disjointintervals_specification import DisjointIntervalsSlowSpec
 from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_list import DisjointIntervalsList
 from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_blist import DisjointIntervalsBList
+from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.disjointintervals_array import DisjointIntervalsArray
 
 RangeOp = Tuple[str, Interval]
 
@@ -17,6 +18,7 @@ RangeOp = Tuple[str, Interval]
 IMPLEMENTATIONS = [DisjointIntervalsSlowSpec,
                    DisjointIntervalsList,
                    DisjointIntervalsBList,
+                   DisjointIntervalsArray
                    # DisjointIntervalsSortedList
                    ]
 

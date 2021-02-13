@@ -1,5 +1,6 @@
 from typing import Set
 
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 # types and the test case lists should be the only dependencies
 from .types_for_tests import *
 from .generate_testcases import add_cases, del_cases
