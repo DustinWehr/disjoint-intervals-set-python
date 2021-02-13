@@ -1,8 +1,8 @@
 # About
 
-Several implementations of a data structure that maintains a set of disjoint integer intervals.
+Four Python 3 implementations of a data structure that efficiently maintains a set of disjoint integer intervals.
 
-Intervals are closed on the left, open on the right: `[1,2)` means the set `{1}`.
+Intervals are closed on the left, open on the right. So `[1,2)` means the set `{1}`.
 
 Adjacent intervals are joined, meaning if you add `[1,3)` and `[3,5)` to an empty 
 DisjointIntervalsSet, you'll get the single interval set `{[1,5)}`.
@@ -29,18 +29,19 @@ Cython implementation.
 
 # Testing Correctness
 
-There is code in `tests` for generating and, independently of the code in package `disjointintervals`, 
-verifying a large number of small tests, specifically for "all the ways" of: 
-- adding an interval to 1,2 or 3 disjoint intervals.
-- deleting an interval from 1,2 or 3 disjoint intervals.
+There is code in `tests` for generating and verifying a large number of small tests. 
+*The verification is independent of the code in package `disjointintervals`*. For a parameter `m`,
+those tests are intended to cover "all the ways" of: 
+- adding an interval to 1, 2, ..., or `m` starting disjoint intervals.
+- deleting an interval from 1, 2, ..., or `m` starting disjoint intervals.
 
-You can increase the max number of starting intervals (currently 3) in `tests/opseq_generator.py`.
-Currently they should be: 
+`m` is set to 3 in the code. You can change it by modifying `tests/opseq_generator.py`.
+Currently the set of starting interval-sets should be: 
 ```
 [-1, 1)
 [-3, -1), [1, 3)
 [-5, -3), [-1, 1), [3, 5)
-# same as two previous lines, but make intervals as close as possible without getting joined.
+# And, same as two previous lines, but make intervals as close as possible without getting joined:
 [-4, -1), [0, 3)  
 [-5, -3), [-2, 1), [2, 5)
 ```
@@ -54,13 +55,14 @@ And "all the ways" for `[-3, -1), [1, 3)` means adding or deleting one of:
 ```
 You can see the generated test cases by doing 
 ```
-DisjointIntervalsSet/tests$ pytest-3 generate_testcases.py
+$ pytest-3 <repo root dir>/tests/generate_testcases.py
 ```
 
-To run all the currently-enabled tests, without verifying the generated cases:
+To run all the currently-enabled tests, without verifying the generated cases, run from `<repo root dir>`,
+or `<repo root dir>/tests`:
 
 ```
-DisjointIntervalsSet/tests$ pytest-3
+$ pytest-3
 ```
 
 ## Verifying Generated Test Cases
@@ -71,7 +73,7 @@ any regard to efficiency. It is used to generate, but not to verify, the generat
 Instead, verification is done in `independently_verify_generated_cases.py` using just Python's 
 `range` and `set`, by actually generating the integer sets. You can run the verification with 
 ```
-DisjointIntervalsSet/tests$ pytest-3 independently_verify_generated_cases.py
+$ pytest-3 <repo root dir>/tests/independently_verify_generated_cases.py
 ```
 
 
@@ -79,7 +81,7 @@ DisjointIntervalsSet/tests$ pytest-3 independently_verify_generated_cases.py
 
 - `test_absolute_examples.py` is an untidy set of explicit small test cases that are not intended to
 provide full coverage. Rather, I would distill and add a small case whenever I found an error using:
-- `test_equivalence.py`, which has code that checks that different implementations of 
+- `test_equivalence.py`, which has code that checks that the 4 different implementations of 
 `DisjointIntervalsInterface` produce exactly the same results when run on random sequence of operations. 
 I've only left a couple tests enabled in `test_equivalence.py`.
 
@@ -92,17 +94,19 @@ worst-case `O(n)`-time operations. This is because `blist` has much slower get a
 (`O(log n)` machine ops with a significant constant) than python's dynamic arrays do (one to a few 
 machine ops). 
 
+`array`-based implementation is 15% - 20% faster than `list`-based, but will currently only work 
+with interval endpoints in the range `[0, 2^32 - 1]`. 
 
 
 ## Testing Performance
 
 In order to check performance with assertions turned off:
 ```
-tests$ python3 - O compare_performance.py
+$ python3 - O <repo root dir>/tests/compare_performance.py
 ```
 or 
 ```
-$ pypy3 - O compare_performance.py
+$ pypy3 -O <repo root dir>/tests/compare_performance.py
 ```
 
 
