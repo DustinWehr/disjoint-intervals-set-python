@@ -33,9 +33,10 @@ print("""Run this script with one of
 from DisjointIntervalsSet.tests.helpers_for_tests import random_adds_various_deletes
 
 if __name__ == '__main__':
-    # ops1c = random_adds_various_deletes(1000000, .7, range(0, 100000000), 100, 10000)
+    # ops1 = random_adds_various_deletes(1000000, .7, range(0, 100000000), 100, 10000)
     # ops1b = random_adds_various_deletes(100000, .9, range(0, 1000000000), 100, 1000000)
-    ops1 = random_adds_various_deletes(500000, .8, range(0, 100000000), 100, 10000)
+    # ops1c = random_adds_various_deletes(500000, .8, range(0, 100000000), 100, 10000)
+    ops1 = random_adds_various_deletes(1000000, .7, range(0, 100000000), 10, 50)
 
     # ops2 = random_adds_various_deletes(100000, .8, range(0, 1000000), 1000, 100000)
     # ops3 = random_adds_various_deletes(100000, .8, range(0, 100000), 100, 10000)

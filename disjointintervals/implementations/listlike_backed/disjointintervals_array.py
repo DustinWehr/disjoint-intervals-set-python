@@ -8,7 +8,7 @@ from bisect import bisect_left, bisect_right
 
 from ..interval_util import intersection_nonempty
 
-IntInterval = int  # actually, 64-bit int
+IntInterval = int  # actually, unsigned 64-bit int
 
 
 def packed_to_pair(x: IntInterval) -> TupInterval:
@@ -19,11 +19,11 @@ def packed_intersection_nonempty(r1: int, r2: int) -> bool:
 
 
 class DisjointIntervalsArray(DisjointIntervalsListlikeABC):
-    def _listlist_constructor(self, itemsiter: Iterable[TupInterval]) -> array[IntInterval]:
+    def _listlist_constructor(self, itemsiter: Iterable[TupInterval]) -> Any:  # Array[IntInterval]:
         return array("Q", [self._pair_interval_to_int(x) for x in itemsiter])
 
-    def _internal_listlist_constructor(self, itemsiter: Iterable[IntInterval]) -> array[IntInterval]:
-        return array("q", itemsiter)
+    def _internal_listlist_constructor(self, itemsiter: Iterable[IntInterval]) -> Any:  # Array[IntInterval]:
+        return array("Q", itemsiter)
 
     def _sort(self) -> None:
         """quick and dirty"""
@@ -35,19 +35,20 @@ class DisjointIntervalsArray(DisjointIntervalsListlikeABC):
     def intervals(self) -> List[TupInterval]:
         return [(self._interval_to_left_endpoint(I), self._interval_to_right_endpoint(I)) for I in self._inter]
 
-    def _get_unpack_interval(self, i: int) -> TupInterval:
-        x = self._inter[i]
-        return x >> 32, x & 0b0000000000000000000000000000000011111111111111111111111111111111
     def _pair_interval_to_int(self, pair: TupInterval) -> IntInterval:
         return self._interval(pair[0], pair[1])
     def _int_interval_to_pair(self, x: IntInterval) -> TupInterval:
         return self._interval_to_left_endpoint(x), self._interval_to_right_endpoint(x)
-    def _interval(self, left, right):
+    def _interval(self, left: int, right: int):
         return (left << 32) + right
     def _interval_to_left_endpoint(self, interval: IntInterval) -> int:
         return interval >> 32
     def _interval_to_right_endpoint(self, interval: IntInterval) -> int:
         return interval & 0b0000000000000000000000000000000011111111111111111111111111111111
+
+    def _get_unpack_interval(self, i: int) -> TupInterval:
+        x = self._inter[i]
+        return x >> 32, x & 0b0000000000000000000000000000000011111111111111111111111111111111
     def _get_left_endpoint(self, i):
         return self._inter[i] >> 32
     def _get_right_endpoint(self, i):

@@ -1,13 +1,30 @@
 # About
 
+Several implementations of a data structure that maintains a set of disjoint integer intervals.
+
+Intervals are closed on the left, open on the right: `[1,2)` means the set `{1}`.
+
+Adjacent intervals are joined, meaning if you add `[1,3)` and `[3,5)` to an empty 
+DisjointIntervalsSet, you'll get the single interval set `{[1,5)}`.
+
+These are the main operations:
+
+- `intervals.add(x,y)` - adds `[x,y)` to the set.
+- `intervals.delete(x,y)` - deletes `[x,y)` from the set. For example, if `intervals` is the single
+interval set `{[1,5)}`, then `intervals.delete(3,4)` will result in `{[1,3),[4,5)}`
+- `intervals.get_intersecting(x,y)` - return a list of all the intervals in the set that intersect
+`[x,y)`.
 
 
+## Note to any seekers of jobs at K*****
 
-# Note to any seekers of jobs at K*****
-
-This repo grew out of my solution to a coding challenge I did while interviewing for a job at K*****. If you found this repo while looking for a python library to help solve a coding challenge at a company named K*****, I propose telling them you found this, considering:
+This repo grew out of my solution to a coding challenge I did while interviewing for a job at K*****. If you found this while looking for a python library to help solve a coding challenge at a company named K*****, I propose telling them you found this, considering:
 - Best case scenario: You get honesty points and an opportunity to show off your dev skills by improving an already-good open source repo.
-- Worst case scenario: You get honesty points and a d
+- Worst case scenario: You get honesty points and a different coding challenge. 
+
+## Todo
+
+Cython implementation.
 
 
 # Testing Correctness
@@ -17,8 +34,8 @@ verifying a large number of small tests, specifically for "all the ways" of:
 - adding an interval to 1,2 or 3 disjoint intervals.
 - deleting an interval from 1,2 or 3 disjoint intervals.
 
-You can increase the max number of starting intervals (currently 3) in `tests/opseq_generator.py`. Currently they 
-should be: 
+You can increase the max number of starting intervals (currently 3) in `tests/opseq_generator.py`.
+Currently they should be: 
 ```
 [-1, 1)
 [-3, -1), [1, 3)
@@ -69,34 +86,12 @@ I've only left a couple tests enabled in `test_equivalence.py`.
 
 # Performance
 
-## Why `blist`-based implementation is worse than `list`-based
+I had to get up to interval lists of size close 500k for the `blist` based implementation with its
+worst-case `O(log n)`-time ops to beat the `list` and `array` based implementations, with their 
+worst-case `O(n)`-time operations. This is because `blist` has much slower get and set ops 
+(`O(log n)` machine ops with a significant constant) than python's dynamic arrays do (one to a few 
+machine ops). 
 
-I think it is just because blist's get and set are significantly slower.
-
-**NO the following explanation appears wrong, based on 9 Feb 2021 tests**:
-
-The apparent advantage of `blist` over `list` disappeared when I changed:
-```
-self._inter = self._inter[:ibl_s] + self._ListOrBList([(s,e)]) + self._inter[ibl_e:]
-```
-to
-```
-self._inter[ibl_s:ibl_e] = self._ListOrBList([(s, e)])
-``` 
-
-## Complexity
-
-`add`, and `delete` are all asymptotically optimal in time complexity, in addition to being fast in practice; both 
-properties are largely thanks to the excellent `blist` package. `get_intersecting` is optimal and fast in practice
-when the number of returned intervals is not large; details below. 
-
-`n` is the number of disjoint intervals.
-
-- `add`: `O(log n)`
-- `del`: `O(log n)`
-- `get_intersecting`: `O(k + log n)` where `k` is the number of returned intervals. If the intervals are returned as
-a `blist` (typed as `Iterable[Interval]`) rather than a `List[Interval]`, it's probably possible to do this in time 
-`O(log n)`, due to `blist`'s copy-on-write implementation. This is a TODO. 
 
 
 ## Testing Performance
@@ -109,3 +104,20 @@ or
 ```
 $ pypy3 - O compare_performance.py
 ```
+
+
+## Asymptotic Complexity of `blist` Implementation 
+
+`add`, and `delete` are all asymptotically optimal in time complexity, in addition to being pretty 
+fast in practice; both properties are largely thanks to the excellent `blist` package. 
+`get_intersecting` is optimal and fast in practice when the number of returned intervals is not 
+large; details below. 
+
+`n` is the number of disjoint intervals.
+
+- `add`: `O(log n)`
+- `del`: `O(log n)`
+- `get_intersecting`: `O(k + log n)` where `k` is the number of returned intervals. If the 
+implementation was changed so that the intervals were returned as a `blist` rather than a 
+`List[Interval]`, it's probably possible to do this in time `O(log n)`, due to `blist`'s 
+copy-on-write implementation. 
