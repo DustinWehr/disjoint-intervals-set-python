@@ -3,7 +3,8 @@ from bisect import bisect_right, bisect_left
 # from DisjointIntervalsSet.disjointintervals.implementations.listlike_backed.bisect_no_cpython import bisect_right_py, bisect_left_py
 
 from DisjointIntervalsSet.disjointintervals.implementations.interval_util import subset, intersection_nonempty
-from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface
+from DisjointIntervalsSet.disjointintervals.types.disjointintervals import DisjointIntervalsInterface, TupInterval
+
 # from DisjointIntervalsSet.disjointintervals.types.disjointintervals import Interval
 
 # this is needed in order to allow DisjointIntervalsArray to redefine it
@@ -29,15 +30,15 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
     """
     def _sort(self) -> None:
         self._inter.sort(key=lambda x: self._interval_to_left_endpoint(x))
-    def _interval(self, left, right):
-        return (left, right)
+    def _interval(self, left: int, right :int) -> Interval:
+        return left, right
     def _interval_to_left_endpoint(self, interval: Interval) -> int:
         return interval[0]
-    def _get_left_endpoint(self, i):
+    def _get_left_endpoint(self, i: int) -> int:
         return self._inter[i][0]
-    def _get_right_endpoint(self, i):
+    def _get_right_endpoint(self, i: int) -> int:
         return self._inter[i][1]
-    def _unpack_interval(self, i: int) -> Interval:
+    def _get_unpack_interval(self, i: int) -> Interval:
         return self._inter[i]
     def _intersection_nonempty(self, r1, r2) -> bool:
         return intersection_nonempty(r1, r2)
@@ -46,7 +47,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
     def _replace_slice(self, start, stop_exclusive, newelem):
         self._inter[start:stop_exclusive] = self._listlist_constructor([newelem])
 
-    def _bisect_left(self, x: int):
+    def _bisect_left(self, x: int) -> int:
         return bisect_left(self._inter, self._interval(x, x))
         # return bisect_left_py(self._inter, x)
 
@@ -58,11 +59,11 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
     # def _bisect_left(self, x: int, left_bound_start=0):
     #     return bisect_left(self._inter, self._interval(x, x), left_bound_start)
 
-    def _bisect_right(self, x: int):
+    def _bisect_right(self, x: int) -> int:
         return bisect_right(self._inter, self._interval(x, x))
         # return bisect_right_py(self._inter, x)
 
-    def intervals(self) -> List[Interval]:
+    def intervals(self) -> List[TupInterval]:
         return self._inter
 
     def _index_of_interval_touching_strictly_from_left(self, x: int, ibl_x=None) -> int:
@@ -103,7 +104,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
             return
 
         # ibl_s < len(self._inter)
-        s2, e2 = self._unpack_interval(ibl_s)
+        s2, e2 = self._get_unpack_interval(ibl_s)
         if s == s2:
             # Case: [s,e') is a range for some e'. This can only happen at ibl_s.
             if e == e2:
@@ -122,7 +123,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
         # Case: [s,e') is not a range for any e'.
         # Remains to check if [s',e) is a range for some s' > s
         # [s3,e3) is the range that ends just before or at e
-        s3, e3 = self._unpack_interval(ibl_e - 1)
+        s3, e3 = self._get_unpack_interval(ibl_e - 1)
         if e3 == e:
             # Case: [s3,e) is a range, where s3 > s. This can only happen at index ibl_e - 1.
             # We left-extend [s2,e) to [s,e) and then delete any ranges strictly within [s,e).
@@ -149,7 +150,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
         new_s_index = ibl_s
         if ibl_s > 0:
             # There's a range [s2,e2) that starts to the left of s.
-            s2, e2 = self._unpack_interval(ibl_s - 1)
+            s2, e2 = self._get_unpack_interval(ibl_s - 1)
             if e2 >= s:
                 # There's a range [s2,e2), which starts to the left of s, that either touches
                 # or overlaps [s,e). So, it's equivalent to call self.add(s2,e). Thus redefine s:
@@ -164,7 +165,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
         new_e_index = ibl_e
         e_updated = False
         if ibl_e < len(self._inter):
-            s2, e2 = self._unpack_interval(ibl_e)
+            s2, e2 = self._get_unpack_interval(ibl_e)
             # There's a range that starts at or after e.
             assert e <= s2
             if e == s2:
@@ -175,7 +176,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
                 e_updated = True
 
         if not e_updated and ibl_e > 0:
-            s2, e2 = self._unpack_interval(ibl_e - 1)
+            s2, e2 = self._get_unpack_interval(ibl_e - 1)
             if e2 > e:
                 # [s2,e2) is a range that starts to the left of e, and finishes strictly after e, which means this call
                 # to add should effectively union [s,e) and [s2,e2).
@@ -215,7 +216,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
                 j = -1
 
         if j != -1:
-            s1, e1 = self._unpack_interval(j)
+            s1, e1 = self._get_unpack_interval(j)
             if s1 <= s and e <= e1:
                 # PART 1
                 # The cases where [s,e) is a subset of an existing range.
@@ -245,7 +246,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
         # assert all(not subset(self._interval(s,  e), r) for r in self.intervals())
         i = self._index_of_interval_touching_strictly_from_left(s, ibl_s)
         if i != -1:
-            s1, e1 = self._unpack_interval(i)
+            s1, e1 = self._get_unpack_interval(i)
             assert s <= e1
             # truncate [s1,e1)
             self._inter[i] = self._interval(s1,  s)
@@ -255,7 +256,7 @@ class DisjointIntervalsListlikeABC(DisjointIntervalsInterface):
         ibl_e = self._bisect_left(e)
         i = self._index_of_interval_touching_strictly_from_left(e, ibl_e)
         if i != -1:
-            s1, e1 = self._unpack_interval(i)
+            s1, e1 = self._get_unpack_interval(i)
             assert s < s1  # otherwise we would have been in the PART 1 cases
             assert s1 < e
             if e < e1:

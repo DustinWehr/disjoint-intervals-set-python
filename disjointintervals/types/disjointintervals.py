@@ -8,7 +8,7 @@ class DisjointIntervalsInterface:
     def __init__(self) -> None:
         pass
 
-    def _listlist_constructor(self, itemsiter) -> Any:
+    def _listlist_constructor(self, itemsiter: Iterable[TupInterval]) -> Any:
         pass
 
     def __eq__(self, other) -> bool:
@@ -18,7 +18,7 @@ class DisjointIntervalsInterface:
         intervals = self.intervals()
         if len(intervals) == 0:
             return "{}"
-        return ", ".join(f"[{I[0]},{I[1]})" for I in intervals)
+        return ", ".join(f"[{inter[0]},{inter[1]})" for inter in intervals)
 
     def __repr__(self) -> str:
         return str(self)

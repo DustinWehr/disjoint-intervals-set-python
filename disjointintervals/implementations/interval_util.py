@@ -90,12 +90,6 @@ def separated(r1: Interval, r2: Interval) -> bool:
     return r1[1] < r2[0]
 
 
-def packed_to_pair(x:int) -> Tuple[int,int]:
-    return x >> 32, x & 0b0000000000000000000000000000000011111111111111111111111111111111
-
-def packed_intersection_nonempty(r1: int, r2: int) -> bool:
-    return intersection_nonempty(packed_to_pair(r1), packed_to_pair(r2))
-
 def intersection_nonempty(r1: Interval, r2: Interval) -> bool:
     """
     >>> intersection_nonempty((1,6),(4,10))
